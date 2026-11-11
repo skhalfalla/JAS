@@ -1,0 +1,20 @@
+/* Job pages: Jobs to review, a job's details, Saved / Not a match, Applying soon. */
+.job-card h2, .soon-card h2 { font-size: 1.2rem; }
+.job-card h2 a, .soon-card h2 a { display: inline-flex; align-items: center; min-height: 44px; }
+.badges .badge { margin: 0 0.15rem 0.3rem 0; }
+.worth-knowing { margin-bottom: 0; }
+.posting-link { display: inline-flex; align-items: center; min-height: 44px; }
+.more-links { display: flex; flex-wrap: wrap; gap: 0 1.5rem; list-style: none; padding: 0; margin: 1.5rem 0 0; }
+.more-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.decision .field textarea { min-height: 5rem; }
+
+/* Sort and filter (Jobs to review, Saved, Not a match, ...): stacked on a phone, side by side when there's room. */
+.job-filters { background: var(--panel); border-radius: var(--radius); padding: 0.4rem 1rem 0.6rem; margin: 1rem 0; }
+.job-filters .filter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)); gap: 0 1rem; }
+.job-filters .filter-words { grid-column: 1 / -1; }
+.job-filters select, .job-filters input[type="search"] { width: 100%; }
+.job-filters .search-row { display: flex; gap: 0.5rem; align-items: stretch; margin: 0; }
+.job-filters .search-row input { flex: 1 1 auto; min-width: 0; }
+.job-filters .filter-status { margin: 0.2rem 0 0; }
+.job-filters .filter-status:empty { display: none; }
+.job-filters .btn-link { min-height: 44px; }

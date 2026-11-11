@@ -8,6 +8,7 @@ import {
   ActionButton, Loaded, Notice, Page, useLoad,
 } from '../ui.js';
 import { appOf, JobMeta } from '../parts/jobs.js';
+import { JobFilters, applyFilters, filtersActive, readFilters } from '../parts/jobfilters.js';
 
 const VIEWS = {
   saved: ['Saved', 'Saved for later'],
@@ -17,16 +18,16 @@ const VIEWS = {
 };
 const PER_PAGE = 50;
 const COLUMNS = 'id,title,organization,location_label,location_raw,pay_min,pay_max,pay_currency,pay_period,pay_status,'
-  + 'route,filter_reasons,route_reasons,decision_reason,applications(id)';
+  + 'route,filter_reasons,route_reasons,decision_reason,applications(id),metro,remote,deadline,score';
 
-async function load(view, page) {
+async function load(view, page, f) {
   let q = sb.from('jobs').select(COLUMNS);
   if (view === 'saved') q = q.eq('decision', 'save');
   else if (view === 'not_a_match') q = q.in('route', ['hidden', 'excluded']).is('duplicate_of_id', null);
   else if (view === 'skipped') q = q.eq('decision', 'skip');
   const from = (page - 1) * PER_PAGE;
   // One extra row says whether there's a next page.
-  const found = await rows(q.order('id', { ascending: false }).range(from, from + PER_PAGE));
+  const found = await rows(applyFilters(q, f).range(from, from + PER_PAGE));
   return { jobs: found.slice(0, PER_PAGE), hasMore: found.length > PER_PAGE };
 }
 
@@ -66,17 +67,17 @@ function BrowseCard({ job, view }) {
     </article>`;
 }
 
-function BrowseList({ view, page }) {
-  const result = useLoad(() => load(view, page), [view, page]);
+function BrowseList({ view, page, f, keep }) {
+  const result = useLoad(() => load(view, page, f), [view, page]);
   return html`
     <${Loaded} result=${result}>${(d) => html`
-      ${d.jobs.length === 0 && html`<p>Nothing here.</p>`}
+      ${d.jobs.length === 0 && html`<p>${filtersActive(f, 'newest') ? 'No jobs here match these filters.' : 'Nothing here.'}</p>`}
       ${d.jobs.map((job) => html`<${BrowseCard} key=${job.id} job=${job} view=${view} />`)}
       ${(page > 1 || d.hasMore) && html`
         <nav aria-label="Pages" class="actions">
           ${page > 1 && html`
-            <a class="btn btn-secondary" href=${href('/browse', { view, page: page > 2 ? page - 1 : undefined })}>Previous page</a>`}
-          ${d.hasMore && html`<a class="btn btn-secondary" href=${href('/browse', { view, page: page + 1 })}>Next page</a>`}
+            <a class="btn btn-secondary" href=${href('/browse', { ...keep, page: page > 2 ? page - 1 : undefined })}>Previous page</a>`}
+          ${d.hasMore && html`<a class="btn btn-secondary" href=${href('/browse', { ...keep, page: page + 1 })}>Next page</a>`}
         </nav>`}`}<//>`;
 }
 
@@ -84,6 +85,10 @@ export default function Browse({ query }) {
   let view = query.view === undefined ? 'saved' : query.view;
   if (!Object.prototype.hasOwnProperty.call(VIEWS, view)) view = 'all';
   const page = Math.max(1, Number.parseInt(query.page, 10) || 1);
+  const f = readFilters(query, 'newest');
+  const keep = {
+    view, sort: query.sort, place: query.place, q: query.q, paid: query.paid,
+  };
   return html`
     <${Page} title=${VIEWS[view][1]}>
       <ul class="tabs" aria-label="Which jobs to show">
@@ -92,6 +97,7 @@ export default function Browse({ query }) {
       </ul>
       ${view === 'not_a_match' && html`
         <p>These were set aside automatically. The reason is listed on each one. Unpaid jobs and jobs below your pay minimum can't be applied to here.</p>`}
-      <${BrowseList} key=${`${view}:${page}`} view=${view} page=${page} />
+      <${JobFilters} path="/browse" query=${query} defaultSort="newest" keep=${{ view }} />
+      <${BrowseList} key=${`${view}:${page}:${JSON.stringify(f)}`} view=${view} page=${page} f=${f} keep=${keep} />
     <//>`;
 }

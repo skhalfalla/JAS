@@ -2,7 +2,9 @@
 import { html, render, useEffect, useRef, useState } from './lib.js';
 import { configured, rpc, sb } from './api.js';
 import { Layout } from './layout.js';
-import { navigate, parse, useRoute } from './router.js';
+import {
+  navigate, parse, takeKeepFocus, useRoute,
+} from './router.js';
 import {
   pageChanged, refreshCounts, refreshStatus, resetApp, update, useApp,
 } from './store.js';
@@ -76,6 +78,7 @@ function Shell() {
     pageChanged();
     if (userId) { refreshCounts(); refreshStatus(); }
     if (first.current) { first.current = false; return undefined; }
+    if (takeKeepFocus(route.path)) return undefined; // a sort or filter changed on the same page
     window.scrollTo(0, 0);
     const from = document.activeElement;
     const until = Date.now() + FOCUS_WAIT_MS;

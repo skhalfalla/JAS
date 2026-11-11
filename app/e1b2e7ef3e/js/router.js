@@ -76,8 +76,17 @@ export function href(path, query) {
   return `#${path}${qs ? `?${qs}` : ''}`;
 }
 
-export function navigate(path, query, { replace = false } = {}) {
+// After navigate(..., { keepFocus: true }) the page stays (a sort or filter changed), so focus and scrolling stay too.
+// It holds for that page for a moment rather than once, so two quick changes in a row both keep focus.
+let keepFocusOn = { path: null, until: 0 };
+
+export function takeKeepFocus(path) {
+  return keepFocusOn.path === path && Date.now() < keepFocusOn.until;
+}
+
+export function navigate(path, query, { replace = false, keepFocus = false } = {}) {
   const target = href(path, query);
+  keepFocusOn = keepFocus ? { path, until: Date.now() + 1500 } : { path: null, until: 0 };
   approved = true; // the dashboard's own moves (after saving, the tour, signing in) never ask
   if (replace) {
     window.history.replaceState(null, '', target);
