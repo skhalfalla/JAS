@@ -1,0 +1,41 @@
+/* Application pages: My applications, one application, a document, and Questions to answer. */
+
+/* My applications */
+.app-card h2 { font-size: 1.15rem; margin: 0 0 0.3rem; }
+.app-card h2 a, .question-group h2 a { display: inline-flex; align-items: center; min-height: 44px; }
+.status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; margin: 0.4rem 0 0; }
+.app-needs { margin: 0.5rem 0 0; }
+
+/* One application */
+.job-links { display: flex; flex-wrap: wrap; gap: 0 1.2rem; margin: 0 0 0.5rem; }
+.job-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.app-status > :last-child { margin-bottom: 0; }
+.app-actions { margin: 0 0 1.5rem; }
+.app-actions .action, .finish .action, .outcome-row .action, .doc-actions .action {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem;
+}
+.doc-card p { margin-bottom: 0.4rem; }
+.doc-card .actions { margin-top: 0.4rem; }
+.finish .steps > li > p, .finish .file-links { margin: 0.4rem 0; }
+.finish .copy-row { margin-top: 0.4rem; }
+dl.answers dd.copy-row { margin-top: 0.3rem; }
+.outcome-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.6rem 1rem; margin-bottom: 1rem; }
+.outcome-row .field { flex: 1 1 14rem; max-width: 24rem; }
+.outcome-row .field label { margin-top: 0; }
+
+/* Questions */
+.question-group + .question-group { margin-top: 2rem; }
+.question .field:first-child > label { margin-top: 0; }
+.question fieldset { border: 0; padding: 0; margin: 0 0 0.5rem; }
+.question fieldset legend { padding: 0; }
+.private-note {
+  display: block; margin: 0.3rem 0; padding: 0.3rem 0.6rem; border-left: 4px solid var(--primary); border-radius: 4px;
+  background: var(--info-bg); color: var(--text); font-weight: 700;
+}
+
+/* One document */
+.doc-files { margin: 0.6rem 0 1rem; }
+.changes li { margin-bottom: 0.4rem; }
+.doc-actions { margin-top: 2rem; padding-top: 0.2rem; border-top: 2px solid var(--border); }
+.doc-change, .doc-edit { margin-top: 1.2rem; }
+.doc-edit details.more { margin-top: 0.2rem; }
