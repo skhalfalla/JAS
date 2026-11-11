@@ -1,0 +1,34 @@
+/* The admin page (web/js/pages/admin.js). */
+.admin code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em;
+  background: var(--panel); border-radius: 4px; padding: 0.05rem 0.3rem; overflow-wrap: anywhere; }
+.admin .break { overflow-wrap: anywhere; }
+.admin .locks li { margin-bottom: 0.4rem; }
+.admin h3:focus { outline: none; box-shadow: none; }
+
+/* Tables: a caption on top, and wide ones scroll sideways on a phone instead of squeezing. */
+.admin .table-wrap { margin: 0.5rem 0 1rem; }
+.admin table.simple caption { text-align: left; font-weight: 700; padding: 0 0 0.4rem; }
+.admin table.simple.wide { min-width: 36rem; }
+.admin table.simple tbody th { font-weight: 400; }
+.admin table.simple tfoot th, .admin table.simple tfoot td { font-weight: 700; border-bottom: none; }
+
+/* The Mac worker */
+.admin .worker h3 { margin-bottom: 0.3rem; }
+.admin .worker-state { margin: 0 0 0.4rem; }
+.admin .facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.25rem 1rem; margin: 0; }
+.admin .facts dt { font-weight: 700; }
+.admin .facts dd { margin: 0; }
+
+/* Waiting and failed tasks */
+.admin .task-list { list-style: none; padding: 0; display: grid; gap: 0.75rem; }
+.admin .task-list li { border: 2px solid var(--border); border-radius: var(--radius); padding: 0.6rem 0.9rem; }
+.admin .task-list p { margin: 0 0 0.4rem; }
+
+/* Command-line only */
+.admin .commands dt { font-weight: 700; margin-top: 0.8rem; }
+.admin .commands dd { margin: 0.2rem 0 0; }
+
+@media (max-width: 30rem) {
+  .admin .facts { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .admin .facts dd { margin-bottom: 0.4rem; }
+}
