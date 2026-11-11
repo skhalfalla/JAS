@@ -57,6 +57,9 @@ window.addEventListener('hashchange', (event) => {
   const allowed = approved || !unsaved.size || window.location.hash === current || window.confirm(LEAVE);
   approved = false;
   if (allowed) {
+    // Leaving the page (she said OK, or nothing was unsaved): its forms no longer count, even before they've been
+    // taken down. Otherwise a quick next move could ask again about a page she has already left.
+    if (parse(window.location.hash).path !== parse(current).path) unsaved.clear();
     current = window.location.hash;
     return;
   }

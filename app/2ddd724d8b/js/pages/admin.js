@@ -83,12 +83,15 @@ function ModeChoice({ mode, changed }) {
   };
   return html`
     <${RadioGroup} legend="Sending mode" options=${MODES} value=${choice} onChange=${setChoice}
-      hint="Practice and Live only work while the pause is off and the Mac allows it too." />
+      hint="Practice and Live only work while the pause is off." />
     <div class="actions"><${ActionButton} onAction=${save}>Save sending mode<//></div>`;
 }
 
-function Sending({ paused, mode, done }) {
-  const blocked = paused || !['dry_run', 'live'].includes(mode);
+function Sending({
+  paused, mode, macMode, done,
+}) {
+  const macBrake = macMode === 'off' || macMode === 'dry_run' ? macMode : null;
+  const blocked = paused || !['dry_run', 'live'].includes(mode) || macBrake === 'off';
   const name = MODE_NAMES[mode] || 'Off';
   const changed = (message) => {
     done(message);
@@ -101,7 +104,9 @@ function Sending({ paused, mode, done }) {
   let status = 'Sending is OFF: nothing will be sent to employers.';
   if (!blocked && mode === 'dry_run') status = 'Practice mode: forms are filled in, but nothing is sent to employers.';
   if (!blocked && mode === 'live') {
-    status = 'Sending is LIVE: applications are really sent to employers (if the Mac allows it too).';
+    status = macBrake === 'dry_run'
+      ? 'Practice mode: the Mac has an emergency brake set, so forms are filled in but nothing is sent.'
+      : 'Sending is LIVE: applications are really sent to employers.';
   }
   const pauseButton = paused
     ? html`<${ActionButton} onAction=${setPause(false)} confirm=${mode === 'live' ? RESUME_LIVE_CONFIRM : undefined}>Resume everything<//>`
@@ -109,14 +114,17 @@ function Sending({ paused, mode, done }) {
   return html`
     <h2>Sending</h2>
     <${Notice} kind=${blocked ? 'info' : 'warn'}><p><strong>${status}</strong></p><//>
-    <p>Three locks must all be open before anything is sent:</p>
+    <p>Both of these are controlled here. Nothing is sent unless the pause is off and the sending mode allows it:</p>
     <ol class="locks">
       <li><strong>The pause</strong> is ${paused ? 'on, so nothing is sent.' : 'off.'}</li>
       <li><strong>The sending mode</strong> is ${name}.</li>
-      <li><strong>The Mac's own switch</strong> must also allow it: <code>WORKER_SUBMIT_MODE</code> in
-        <code>~/.jas-worker.env</code> has to be <code>dry_run</code> or <code>live</code> (it's off unless you set
-        it). The stricter of the two modes always wins.</li>
     </ol>
+    <p class="small muted">The Mac follows these switches within a minute or two. Nothing needs changing on the Mac.</p>
+    ${macBrake && html`
+      <${Notice} kind="warn"><p><strong>The Mac has an emergency brake set</strong>
+        (<code>WORKER_SUBMIT_MODE=${macBrake}</code>), so it ${macBrake === 'off' ? 'never sends' : 'only does practice runs'},
+        whatever is chosen here. To let this page decide again, remove that line from <code>~/.jas-worker.env</code> on
+        the Mac and restart the worker.</p><//>`}
     <div class="actions">${pauseButton}</div>
     <${ModeChoice} mode=${mode} changed=${changed} />`;
 }
@@ -285,6 +293,7 @@ function CommandLine() {
 // ---------------------------------------------------------------- the page
 
 function Overview() {
+  const app = useApp();
   const result = useLoad(() => rpc('admin_overview'), []);
   const refocus = useRef(null);
   useEffect(() => {
@@ -301,7 +310,7 @@ function Overview() {
   return html`
     <${Page} title="Admin" className="admin">
       <${Loaded} result=${result}>${(d) => html`
-        <${Sending} paused=${d.paused} mode=${d.mode} done=${done} />
+        <${Sending} paused=${d.paused} mode=${d.mode} macMode=${app.worker && app.worker.mac_mode} done=${done} />
         <${Workers} workers=${d.workers || []} />
         <${Tasks} data=${d} done=${done} refocus=${refocus} />
         <${Sources} runs=${d.runs || []} />
