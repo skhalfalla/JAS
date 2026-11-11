@@ -1,0 +1,98 @@
+/* Settings pages: Preferences, My résumé facts, Writing style, My saved answers, Getting set up, How this works. */
+
+/* The Save area: the button, a short "saved" note next to it, and any problem right below it. */
+.save-bar { margin: 1.5rem 0 0; padding-top: 0.4rem; border-top: 2px solid var(--border); }
+.save-bar > .hint { margin: 0.6rem 0 0; }
+.save-bar .inline-error { margin-top: 0.6rem; }
+.saved-note { color: var(--success); font-weight: 700; }
+/* While something isn't saved, the Save area says so and stays in view at the bottom of the screen. */
+.save-bar.dirty { position: sticky; bottom: 0; z-index: 5; background: var(--bg); padding-bottom: 0.6rem;
+  box-shadow: 0 -10px 12px -12px rgba(0, 0, 0, 0.45); }
+.unsaved-note { margin: 0.6rem 0 0; font-weight: 700; color: var(--warn-text); }
+.add-note { margin: 0.5rem 0 0; color: var(--warn-text); font-weight: 700; }
+p.saved-note { margin: 0.6rem 0 0; }
+
+/* Preferences: a group that holds a checklist plus one more choice (places + other US cities). */
+.prefs-group > fieldset.checklist { border: 0; padding: 0; margin: 0.3rem 0 0; min-width: 0; }
+.prefs-group > fieldset.checklist > legend { margin-top: 0.6rem; padding: 0; }
+/* Lists that are all hers (no built-in choices): the "(you added this)" note adds nothing there. */
+.own-list .choice .muted.small { display: none; }
+
+/* Disclosures (roles, advanced search words) show an arrow that turns when open. */
+details.role-card > summary, details.disclosure > summary { list-style: none; }
+details.role-card > summary::-webkit-details-marker, details.disclosure > summary::-webkit-details-marker { display: none; }
+details.role-card > summary::before, details.disclosure > summary::before {
+  content: "▸"; content: "▸" / ""; display: inline-block; width: 1.1em; flex: 0 0 auto; color: var(--primary);
+}
+details[open].role-card > summary::before, details[open].disclosure > summary::before { content: "▾"; content: "▾" / ""; }
+
+/* Two or three fields side by side on wider screens, one per row on a phone. */
+.field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0 1rem; align-items: end; }
+.field-grid > .field { min-width: 0; }
+
+/* Editable lists (facts, skills): each item with its own Remove button. */
+.list-editor { min-width: 0; }
+.list-items, .bullet-list { list-style: none; padding: 0; margin: 0.4rem 0 0; display: grid; gap: 0.6rem; }
+.list-item { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem 0.8rem; }
+.list-item > .field { flex: 1 1 18rem; min-width: 0; }
+.list-item label { margin-top: 0.3rem; }
+.list-item textarea { min-height: 4.5rem; }
+/* One-line items (skills): Remove sits beside the box, and the label too when there's room. */
+.list-items.compact .list-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 0 0.6rem; }
+@media (min-width: 40rem) {
+  .list-items.compact .list-item { align-items: center; }
+  .list-items.compact .list-item > .field { display: flex; align-items: center; gap: 0 0.8rem; }
+  .list-items.compact .list-item > .field > label { margin: 0; min-width: 4.5rem; }
+  .list-items.compact .list-item > .field > input { flex: 1 1 auto; width: auto; min-width: 0; }
+}
+
+/* Résumé facts: roles and their bullet points */
+details.role-card > summary {
+  display: block; position: relative; min-height: 44px; padding: 0.55rem 0 0.55rem 1.4em; cursor: pointer;
+  font-weight: 700; color: var(--primary);
+}
+details.role-card > summary::before { position: absolute; left: 0; top: 0.55rem; }
+details.role-card[open] > summary { margin-bottom: 0.3rem; }
+.role-dates { font-weight: 400; font-size: 0.9rem; color: var(--muted); white-space: nowrap; }
+/* Inside a role or a skills group, the inner groups get a rule on top instead of a full box (more room on phones). */
+.role-card fieldset.bullets, .role-card fieldset.list-editor, .skill-group fieldset.list-editor,
+.edu-card fieldset.list-editor {
+  border: 0; border-top: 2px solid var(--border); border-radius: 0; padding: 0.3rem 0 0; margin: 1.4rem 0 0;
+}
+.role-card fieldset.bullets > legend, .role-card fieldset.list-editor > legend, .skill-group fieldset.list-editor > legend,
+.edu-card fieldset.list-editor > legend {
+  padding: 0 0.4rem 0 0;
+}
+fieldset.role-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.bullet-item { border-left: 4px solid var(--border); padding-left: 0.8rem; }
+.bullet-item textarea { min-height: 5.5rem; }
+.bullet-tools { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem 0.8rem; }
+.bullet-tools > .field { flex: 1 1 12rem; max-width: 22rem; }
+.role-remove { margin-top: 1.6rem; }
+.add-role { margin-top: 1.5rem; }
+fieldset.skill-group, fieldset.edu-card { padding-top: 0.6rem; }
+.edu-card .actions { margin-top: 1rem; }
+.skill-group .group-name label { margin-top: 0.3rem; }
+.suggestions .card .action { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem; }
+
+/* Writing samples */
+.sample-list { display: grid; gap: 0; }
+.sample-card h3 { margin: 0 0 0.2rem; }
+.sample-card .actions .action, .add-sample .actions .action {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem;
+}
+.add-sample .upload-field { margin-top: 1.5rem; padding-top: 0.4rem; border-top: 2px solid var(--border); }
+.upload-field input[type="file"] {
+  display: block; width: 100%; max-width: 100%; min-height: 48px; padding: 0.4rem; font: inherit; color: var(--text);
+  background: #fff; border: 2px dashed var(--text); border-radius: 6px; cursor: pointer;
+}
+.upload-field input[type="file"]::file-selector-button {
+  min-height: 40px; margin-right: 0.8rem; padding: 0.3rem 0.9rem; font: inherit; font-weight: 700; color: var(--primary);
+  background: #fff; border: 2px solid var(--primary); border-radius: 6px; cursor: pointer;
+}
+.upload-field input[type="file"]:hover::file-selector-button { background: var(--info-bg); }
+
+/* Saved answers and setup */
+.answer-group + .answer-group, .setup-step + .setup-step { margin-top: 1.5rem; }
+.answer-group label .badge { margin-left: 0.3rem; font-size: 0.8rem; vertical-align: 0.1em; }
+.setup-step fieldset { margin: 0.8rem 0; }
