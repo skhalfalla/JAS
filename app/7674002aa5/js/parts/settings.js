@@ -90,22 +90,39 @@ export function useSaver() {
   const [state, setState] = useState({ busy: false, error: null, done: null });
   const busy = useRef(false);
   const alive = useRef(true);
+  const racing = useRef(false); // from the moment a save starts until the page has reloaded what was saved
+  const typed = useRef(false); // she changed something in that time
   useEffect(() => () => { alive.current = false; }, []);
   const run = async (fn) => {
     if (busy.current) return;
     busy.current = true;
+    racing.current = true;
+    typed.current = false;
     setState({ busy: true, error: null, done: null });
     try {
       const done = await fn();
+      setTimeout(() => { racing.current = false; }, 8000); // in case nothing reloads
       if (alive.current) setState({ busy: false, error: null, done: done || null });
     } catch (err) {
+      racing.current = false;
       if (alive.current) setState({ busy: false, error: friendly(err), done: null });
     } finally {
       busy.current = false;
     }
   };
   const clearDone = () => { if (state.done) setState((s) => ({ ...s, done: null })); };
-  return { ...state, run, clearDone };
+  /** Call on every edit: remembers a change made while a save is still going through. */
+  const edited = () => { if (racing.current) typed.current = true; };
+  /** Call when saved data reloads: true if she changed something meanwhile, so the form must keep her newer edits. */
+  const keepEdits = () => {
+    const keep = typed.current;
+    typed.current = false;
+    racing.current = false;
+    return keep;
+  };
+  return {
+    ...state, run, clearDone, edited, keepEdits,
+  };
 }
 
 // ---------------------------------------------------------------- fields
@@ -140,8 +157,24 @@ export function useUnsavedGuard(dirty) {
 export function SaveBar({
   label, busyLabel = 'Saving…', saver, onSave, tour, note, dirty = false,
 }) {
+  const bar = useRef(null);
+  // While the bar sticks to the bottom of the screen, a field she tabs to must scroll above it, not behind it.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!dirty || !bar.current) { root.style.removeProperty('--save-bar-height'); return undefined; }
+    const measure = () => { if (bar.current) root.style.setProperty('--save-bar-height', `${bar.current.offsetHeight}px`); };
+    measure();
+    const watcher = typeof ResizeObserver === 'function' ? new ResizeObserver(measure) : null;
+    if (watcher) watcher.observe(bar.current);
+    window.addEventListener('resize', measure);
+    return () => {
+      if (watcher) watcher.disconnect();
+      window.removeEventListener('resize', measure);
+      root.style.removeProperty('--save-bar-height');
+    };
+  }, [dirty]);
   return html`
-    <div class=${dirty ? 'save-bar dirty' : 'save-bar'} data-tour=${tour}>
+    <div class=${dirty ? 'save-bar dirty' : 'save-bar'} data-tour=${tour} ref=${bar}>
       ${note && html`<p class="hint">${note}</p>`}
       ${dirty && html`<p class="unsaved-note">You have changes that aren't saved yet.</p>`}
       <div class="actions">

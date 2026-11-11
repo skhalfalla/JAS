@@ -342,12 +342,20 @@ export function FinishPackage({
         ${letter && html`
           <li>
             <strong>Add your cover letter.</strong>
-            <div class="file-links"><${DocDownloads} doc=${letter} fullName=${contact.name} uk=${uk} /></div>
-            <p class="small">If the site has a box to type it in instead, copy the text:</p>
+            <p class="small">If the form has a box like “Message to the Hiring Team,” “Cover letter,” or “Why are you
+              interested?”, copy the text and paste it there:</p>
             <div class="copy-row">
               <div class="copy-value">${letter.text}</div>
               <${CopyButton} text=${letter.text} label="Copy letter text" />
             </div>
+            <p class="small">If it asks you to upload a cover letter instead, use one of these files:</p>
+            <div class="file-links"><${DocDownloads} doc=${letter} fullName=${contact.name} uk=${uk} /></div>
+          </li>`}
+        ${!letter && html`
+          <li>
+            <strong>Your cover letter.</strong>
+            <p class="small">Your letter is being written. It shows up here in a few minutes; if it doesn't, tell
+              Shihab.</p>
           </li>`}
         ${answered.length > 0 && html`
           <li>

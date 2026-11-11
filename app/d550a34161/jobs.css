@@ -1,9 +1,0 @@
-/* Job pages: Jobs to review, a job's details, Saved / Not a match, Applying soon. */
-.job-card h2, .soon-card h2 { font-size: 1.2rem; }
-.job-card h2 a, .soon-card h2 a { display: inline-flex; align-items: center; min-height: 44px; }
-.badges .badge { margin: 0 0.15rem 0.3rem 0; }
-.worth-knowing { margin-bottom: 0; }
-.posting-link { display: inline-flex; align-items: center; min-height: 44px; }
-.more-links { display: flex; flex-wrap: wrap; gap: 0 1.5rem; list-style: none; padding: 0; margin: 1.5rem 0 0; }
-.more-links a { display: inline-flex; align-items: center; min-height: 44px; }
-.decision .field textarea { min-height: 5rem; }

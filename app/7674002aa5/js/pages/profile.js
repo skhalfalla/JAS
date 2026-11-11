@@ -267,7 +267,7 @@ function EducationCard({ ed, onChange, onRemove }) {
         addLabel=${html`Add a detail<span class="visually-hidden"> to ${name}</span>`} />
       <div class="actions">
         <button type="button" class="btn btn-danger" onClick=${remove}>
-          Remove<span class="visually-hidden"> ${name}</span>
+          Remove this degree or certificate<span class="visually-hidden">: ${name}</span>
         </button>
       </div>
     </fieldset>`;
@@ -283,6 +283,7 @@ function AddRole({ onAdd }) {
   const [v, setV] = useState(BLANK_ROLE);
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
+  useUnsavedGuard(['organization', 'title', 'location', 'start', 'end', 'bullets'].some((k) => tidy(v[k])));
   const set = (key) => (value) => { setV((x) => ({ ...x, [key]: value })); setDone(''); };
   const submit = (event) => {
     event.preventDefault();
@@ -328,6 +329,7 @@ function Editor({ version, suggestions, onSaved }) {
   const [eduError, setEduError] = useState('');
   const saver = useSaver();
   useReset(version, () => {
+    if (saver.keepEdits()) return; // she kept typing while it saved: her newer edits stay (and stay unsaved)
     const next = toEditor(version.data);
     setForm(next);
     setShownIn(Object.fromEntries(next.experiences.map((e) => [e.id, e.section])));
@@ -336,7 +338,7 @@ function Editor({ version, suggestions, onSaved }) {
   const savedProfile = useMemo(() => JSON.stringify(toProfile(toEditor(version.data))), [version]);
   const dirty = JSON.stringify(toProfile(form)) !== savedProfile;
   useUnsavedGuard(dirty);
-  const change = (fn) => { setForm(fn); saver.clearDone(); };
+  const change = (fn) => { saver.edited(); setForm(fn); saver.clearDone(); };
   const setContact = (key, value) => change((f) => ({ ...f, contact: { ...f.contact, [key]: value } }));
   const setRole = (id, patch) => change((f) => ({
     ...f, experiences: f.experiences.map((e) => (e.id === id ? { ...e, ...patch } : e)),
@@ -510,7 +512,7 @@ function Editor({ version, suggestions, onSaved }) {
 
     <h2>Save your changes</h2>
     <${TextField} label="Note about this change (optional)" hint="For example: added my new job. This helps Shihab see what changed."
-      value=${note} maxlength=${300} onInput=${(v) => { setNote(v); saver.clearDone(); }} />
+      value=${note} maxlength=${300} onInput=${(v) => { saver.edited(); setNote(v); saver.clearDone(); }} />
     <${SaveBar} label="Save my résumé facts" saver=${saver} onSave=${save} tour="profile-save" dirty=${dirty} />`;
 }
 

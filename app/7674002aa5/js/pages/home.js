@@ -31,9 +31,9 @@ function Avatar({ path }) {
 const TODO = [
   ['/review', 'review', 'Jobs to look at', 'Say yes, no, or save for later'],
   ['/questions', 'questions', 'Questions to answer', 'Answers are saved so you only answer once'],
-  ['/applications', 'documents', 'Documents to check', 'Tailored résumés and letters that need a look'],
-  ['/applications', 'ready', 'Ready to send', 'Look over and press Send'],
-  ['/applications', 'manual', 'Finish it yourself', 'Sites that need your own account. Everything is prepared.'],
+  ['/applications', 'documents', 'Documents to check', 'Tailored résumés and letters that need a look', { show: 'documents' }],
+  ['/applications', 'ready', 'Ready to send', 'Look them over, then approve them', { show: 'ready' }],
+  ['/applications', 'manual', 'Finish it yourself', 'Sites that need your own account. Everything is prepared.', { show: 'manual' }],
 ];
 
 export default function Home() {
@@ -57,8 +57,8 @@ export default function Home() {
 
           <h2>Needs you</h2>
           <ul class="todo-list" data-tour="home-todo">
-            ${TODO.map(([path, key, label, hint], i) => html`
-              <li data-tour=${i === 0 ? 'home-todo-first' : undefined}><a class=${`todo ${c[key] ? '' : 'zero'}`} href=${href(path)}>
+            ${TODO.map(([path, key, label, hint, query], i) => html`
+              <li data-tour=${i === 0 ? 'home-todo-first' : undefined}><a class=${`todo ${c[key] ? '' : 'zero'}`} href=${href(path, query)}>
                 <span><strong>${label}</strong><br /><span class="small muted">${hint}</span></span>
                 <span class="num">${c[key] || 0}</span>
               </a></li>`)}

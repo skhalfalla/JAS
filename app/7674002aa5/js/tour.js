@@ -77,7 +77,9 @@ const STEPS = [
     title: () => 'Questions to answer',
     body: () => [
       "Some application forms ask things we don't know yet. Answer once and it's saved for next time.",
-      'Self-identification questions (like gender or ethnicity) are always optional, and only you can see your answers.',
+      'Self-identification questions (like gender or ethnicity) are optional, and you can choose “Decline to '
+        + 'self-identify.” Only you can see your answers in this dashboard. The employer receives your choice when '
+        + 'you apply.',
     ],
   },
   {
@@ -109,8 +111,14 @@ const STEPS = [
     targets: ['soon-list'],
     compact: ['soon-stop'],
     title: () => 'Applying soon',
-    body: () => [
-      'These strong matches will be sent automatically at the time shown.',
+    body: (me, setup, sending) => [
+      sending && sending.blocked
+        ? "Sending is turned off right now, so nothing is sent. Once it's turned on, strong matches are sent at the "
+          + 'time shown.'
+        : sending && sending.practice
+          ? "Sending is in practice mode right now: at the time shown we'll fill in the form to check it, but nothing "
+            + 'is sent.'
+          : 'These strong matches will be sent automatically at the time shown.',
       "Changed your mind? Press “Stop, don't apply” and nothing will be sent for that job.",
     ],
   },
@@ -249,6 +257,7 @@ function Tour({ steps, onClose }) {
   const heading = useRef(null);
   const close = useRef(onClose);
   close.current = onClose;
+  const [layout, setLayout] = useState(0); // changes when the window is resized, so the outline is placed again
   const step = steps[index];
   const last = index === steps.length - 1;
   const setup = me.role === 'owner' && !me.onboarded;
@@ -281,6 +290,14 @@ function Tour({ steps, onClose }) {
     };
   }, []);
 
+  // A phone turned sideways (or a window resized) changes how much room the dialog leaves: place the outline again.
+  useEffect(() => {
+    let timer;
+    const onResize = () => { clearTimeout(timer); timer = setTimeout(() => setLayout((n) => n + 1), 150); };
+    window.addEventListener('resize', onResize);
+    return () => { clearTimeout(timer); window.removeEventListener('resize', onResize); };
+  }, []);
+
   // Every step: focus its heading (in the same task that shows the step, so a quick key press can't get lost).
   useLayoutEffect(() => {
     if (heading.current) heading.current.focus();
@@ -309,7 +326,7 @@ function Tour({ steps, onClose }) {
         lit.style.scrollMarginBottom = '';
       }
     };
-  }, [step]);
+  }, [step, layout]);
 
   return html`
     <div class="tour-backdrop" onMouseDown=${(event) => event.preventDefault()}></div>
@@ -317,7 +334,7 @@ function Tour({ steps, onClose }) {
       aria-describedby="tour-body">
       <p class="tour-step">Step ${index + 1} of ${steps.length}</p>
       <h2 id="tour-title" tabindex="-1" ref=${heading}>${step.title(me)}</h2>
-      <div id="tour-body">${step.body(me, setup).map((text) => html`<p>${text}</p>`)}</div>
+      <div id="tour-body">${step.body(me, setup, state.sending).map((text) => html`<p>${text}</p>`)}</div>
       <div class="actions">
         ${index > 0 && html`<button type="button" class="btn btn-secondary" onClick=${() => setIndex(index - 1)}>Back</button>`}
         ${!last && html`<button type="button" class="btn" onClick=${() => setIndex(index + 1)}>Next</button>`}

@@ -94,9 +94,9 @@ function toPrefs(f, admin) {
 function PrefsForm({ prefs, admin, onSaved }) {
   const id = useId();
   const [form, setForm] = useState(() => toForm(prefs));
-  const round = useReset(prefs, () => setForm(toForm(prefs)));
   const saver = useSaver();
-  const set = (patch) => { setForm((f) => ({ ...f, ...patch })); saver.clearDone(); };
+  const round = useReset(prefs, () => { if (!saver.keepEdits()) setForm(toForm(prefs)); });
+  const set = (patch) => { saver.edited(); setForm((f) => ({ ...f, ...patch })); saver.clearDone(); };
   const dirty = JSON.stringify(toPrefs(form, admin)) !== JSON.stringify(toPrefs(toForm(prefs), admin));
   useUnsavedGuard(dirty);
   const fieldError = (name) => (saver.error && FIELD_OF.some(([rx, f]) => f === name && rx.test(saver.error))

@@ -16,7 +16,7 @@
   box-shadow: 0 0 0 8px var(--text) !important; border-radius: 6px; }
 /* A white background keeps it readable over the dimmed page (buttons and header links keep their own colors). */
 .tour-highlight:not(.btn) { background-color: #fff; }
-.site-header .tour-highlight { background-color: var(--primary); }
+.site-header .tour-highlight { background-color: var(--header); }
 /* A fieldset's legend sits on its border: draw the rings underneath it instead of through its text. */
 fieldset.tour-highlight { outline: none !important; box-shadow: 0 0 0 4px var(--focus), 0 0 0 8px var(--text) !important; }
 fieldset.tour-highlight > legend { background-color: #fff; }

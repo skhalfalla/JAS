@@ -14,6 +14,13 @@ const TABS = {
   closed: ['Stopped or withdrawn', ['vetoed', 'skipped', 'withdrawn']],
 };
 
+// Links from Home ("Documents to check", ...) open the list showing just those.
+const SHOW = {
+  documents: ['Documents to check', (a) => a.status === 'needs_you' && Array.isArray(a.needs) && a.needs.includes('document_review')],
+  ready: ['Ready to send', (a) => a.status === 'ready_to_send'],
+  manual: ['Finish it yourself', (a) => a.status === 'manual'],
+};
+
 async function load(tab) {
   const [apps, outcomes] = await Promise.all([
     rows(sb.from('applications')
@@ -71,12 +78,15 @@ function AppCard({ a, sending }) {
     </article>`;
 }
 
-function AppList({ tab, sending }) {
+function AppList({ tab, show, sending }) {
   const result = useLoad(() => load(tab), [tab]);
   return html`
-    <${Loaded} result=${result}>${({ apps, counts }) => {
+    <${Loaded} result=${result}>${({ apps: all, counts }) => {
       const outcomes = Object.keys(OUTCOME_LABELS).filter((k) => counts[k]);
+      const apps = show ? all.filter(SHOW[show][1]) : all;
       return html`
+        ${show && html`
+          <p class="filter-note">Showing only: <strong>${SHOW[show][0]}</strong>. <a href=${href('/applications')}>Show all of my applications</a></p>`}
         ${tab === 'sent' && outcomes.length > 0 && html`
           <p class="outcome-summary">So far: ${outcomes.map((k, i) => html`
             ${i ? ', ' : ''}${OUTCOME_LABELS[k]}: <strong>${counts[k]}</strong>`)}.</p>`}
@@ -87,7 +97,8 @@ function AppList({ tab, sending }) {
 
 export default function Applications({ query }) {
   const store = useApp();
-  const tab = TABS[query.tab] ? query.tab : 'active';
+  const show = SHOW[query.show] ? query.show : '';
+  const tab = show ? 'active' : TABS[query.tab] ? query.tab : 'active';
   return html`
     <${Page} title="My applications">
       <nav aria-label="Which applications to show">
@@ -99,7 +110,7 @@ export default function Applications({ query }) {
         </ul>
       </nav>
       <div class="app-list" data-tour="app-list">
-        <${AppList} key=${tab} tab=${tab} sending=${store.sending} />
+        <${AppList} key=${`${tab}-${show}`} tab=${tab} show=${show} sending=${store.sending} />
       </div>
     <//>`;
 }

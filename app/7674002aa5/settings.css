@@ -8,6 +8,7 @@
 /* While something isn't saved, the Save area says so and stays in view at the bottom of the screen. */
 .save-bar.dirty { position: sticky; bottom: 0; z-index: 5; background: var(--bg); padding-bottom: 0.6rem;
   box-shadow: 0 -10px 12px -12px rgba(0, 0, 0, 0.45); }
+html { scroll-padding-bottom: var(--save-bar-height, 0px); }
 .unsaved-note { margin: 0.6rem 0 0; font-weight: 700; color: var(--warn-text); }
 .add-note { margin: 0.5rem 0 0; color: var(--warn-text); font-weight: 700; }
 p.saved-note { margin: 0.6rem 0 0; }
@@ -27,7 +28,8 @@ details.role-card > summary::before, details.disclosure > summary::before {
 details[open].role-card > summary::before, details[open].disclosure > summary::before { content: "▾"; content: "▾" / ""; }
 
 /* Two or three fields side by side on wider screens, one per row on a phone. */
-.field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0 1rem; align-items: end; }
+.field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr)); gap: 0 1rem; align-items: end; }
+fieldset { min-width: 0; }
 .field-grid > .field { min-width: 0; }
 
 /* Editable lists (facts, skills): each item with its own Remove button. */

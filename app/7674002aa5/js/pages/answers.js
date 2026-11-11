@@ -42,9 +42,9 @@ function Status({ item, edited }) {
 function AnswersForm({ items, onSaved }) {
   const start = () => Object.fromEntries(items.map((item) => [item.id, item.answer]));
   const [values, setValues] = useState(start);
-  useReset(items, () => setValues(start()));
   const saver = useSaver();
-  const set = (id, value) => { setValues((v) => ({ ...v, [id]: value })); saver.clearDone(); };
+  useReset(items, () => { if (!saver.keepEdits()) setValues(start()); });
+  const set = (id, value) => { saver.edited(); setValues((v) => ({ ...v, [id]: value })); saver.clearDone(); };
   const edited = (item) => (values[item.id] ?? '').trim() !== (item.answer || '');
   const dirty = items.some(edited);
   useUnsavedGuard(dirty);
@@ -76,7 +76,8 @@ function AnswersForm({ items, onSaved }) {
         ${groups.map((g) => html`
           <section class="answer-group" key=${g.key}>
             <h2>${g.title}</h2>
-            ${g.key === 'eeo' && html`<p>Only you can see these. Leave any blank to skip that question on forms.</p>`}
+            ${g.key === 'eeo' && html`<p>Only you can see these in this dashboard. Leave any blank to skip that question on forms. When you apply, the
+              employer receives the answers you gave.</p>`}
             ${g.items.map((item) => html`
               <${TextField} key=${item.id} label=${html`${item.question} <${Status} item=${item} edited=${edited(item)} />`}
                 hint=${item.sensitive && g.key !== 'eeo' ? 'Only you can see this answer.' : undefined}

@@ -54,6 +54,7 @@ function AddSample({ onAdded }) {
   const [text, setText] = useState('');
   const [file, setFile] = useState(null);
   const fileRef = useRef(null);
+  useUnsavedGuard(Boolean(text.trim() || file)); // a pasted letter or a chosen file she hasn't added yet
   const paste = async () => {
     await rpc('voice_sample_add', { p_title: title, p_text: text });
     setTitle('');
@@ -100,11 +101,11 @@ function RulesForm({ writing, onSaved }) {
   });
   const [form, setForm] = useState(start);
   // Start fresh only when the saved rules changed (adding a sample reloads the page too).
-  const round = useReset(JSON.stringify(writing), () => setForm(start()));
   const saver = useSaver();
+  const round = useReset(JSON.stringify(writing), () => { if (!saver.keepEdits()) setForm(start()); });
   const dirty = JSON.stringify(form) !== JSON.stringify(start());
   useUnsavedGuard(dirty);
-  const set = (patch) => { setForm((f) => ({ ...f, ...patch })); saver.clearDone(); };
+  const set = (patch) => { saver.edited(); setForm((f) => ({ ...f, ...patch })); saver.clearDone(); };
   const submit = (event) => {
     event.preventDefault();
     saver.run(async () => {

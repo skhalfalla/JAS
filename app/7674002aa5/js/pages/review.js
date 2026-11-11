@@ -8,24 +8,29 @@ import { Loaded, Notice, Page, useLoad } from '../ui.js';
 import {
   CARD_COLUMNS, JobCard, say, useRemovable,
 } from '../parts/jobs.js';
+import {
+  JobFilters, applyFilters, filtersActive, readFilters,
+} from '../parts/jobfilters.js';
 
-function load() {
-  return rows(sb.from('jobs').select(CARD_COLUMNS)
-    .eq('route', 'review').is('decision', null).eq('closed', false)
-    .order('deadline', { ascending: true, nullsFirst: false })
-    .order('score', { ascending: false, nullsFirst: false })
-    .order('id', { ascending: false })
+function load(f) {
+  return rows(applyFilters(sb.from('jobs').select(CARD_COLUMNS)
+    .eq('route', 'review').is('decision', null).eq('closed', false), f)
     .limit(100));
 }
 
-export default function Review() {
-  const result = useLoad(load, []);
+export default function Review({ query }) {
+  const f = readFilters(query, 'deadline');
+  const key = JSON.stringify(f);
+  const result = useLoad(() => load(f), [key]);
   const { gone, remove } = useRemovable();
   return html`
     <${Page} title="Jobs to review">
       <p>These look like good fits but need your call. Press <strong>Apply</strong> and we'll tailor your résumé and prepare the application.</p>
+      <${JobFilters} path="/review" query=${query} defaultSort="deadline"
+        count=${result.data ? result.data.filter((j) => !gone.has(j.id)).length : undefined} />
       <${Loaded} result=${result}>${(jobs) => {
         const shown = jobs.filter((j) => !gone.has(j.id));
+        const filtered = filtersActive(f, 'deadline');
         const headingIds = shown.map((j) => `job-${j.id}-title`);
         const onDecided = (job) => (decision, res) => {
           if (decision === 'apply') {
@@ -38,8 +43,9 @@ export default function Review() {
           say(decision === 'skip' ? MESSAGES.skipped : MESSAGES.saved);
         };
         return html`
-          ${shown.length === 0 && html`
-            <${Notice} kind="ok"><p>Nothing to review right now. New jobs are checked several times a day.</p><//>`}
+          ${shown.length === 0 && (filtered
+            ? html`<p>No jobs to review match these filters.</p>`
+            : html`<${Notice} kind="ok"><p>Nothing to review right now. New jobs are checked several times a day.</p><//>`)}
           ${shown.map((job, i) => html`
             <${JobCard} key=${job.id} job=${job} onDecided=${onDecided(job)}
               tour=${i === 0 ? 'review-card' : undefined} actionsTour=${i === 0 ? 'review-actions' : undefined} />`)}`;

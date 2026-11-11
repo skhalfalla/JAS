@@ -10,6 +10,7 @@ import {
 import {
   ACTIVE, DOC_KIND, docWord, loadContact, useAfterChange, useSubmit,
 } from '../parts/apps.js';
+import { useUnsavedGuard } from '../parts/settings.js';
 
 async function load(id) {
   const [found, contact] = await Promise.all([
@@ -73,9 +74,11 @@ function Preview({ doc, word }) {
 
 function ChangeForm({ doc, after }) {
   const [text, setText] = useState('');
+  useUnsavedGuard(text.trim() !== ''); // what she has written but not sent yet
   const { busy, error, run } = useSubmit();
   const submit = (event) => run(event, async () => {
     await rpc('doc_request_change', { p_doc_id: doc.id, p_feedback: text });
+    setText('');
     after(MESSAGES.change_requested, '#doc-status');
   });
   return html`
@@ -94,9 +97,12 @@ function ChangeForm({ doc, after }) {
 
 function EditForm({ doc, after }) {
   const [text, setText] = useState(doc.text || '');
+  const [saved, setSaved] = useState(false);
+  useUnsavedGuard(!saved && text !== (doc.text || '')); // her edits to the letter that aren't saved yet
   const { busy, error, run } = useSubmit();
   const submit = (event) => run(event, async () => {
     await rpc('doc_save_edit', { p_doc_id: doc.id, p_text: text });
+    setSaved(true);
     after(MESSAGES.edited, '#doc-status');
   });
   return html`
