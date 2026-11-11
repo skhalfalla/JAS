@@ -57,6 +57,7 @@ function toForm(p) {
     focus_areas: known(p.focus_areas, Object.keys(FOCUS_LABELS)),
     custom_focus: texts(p.custom_focus),
     blocked_employers: texts(p.blocked_employers),
+    less_employers: texts(p.less_employers),
     search_keywords: texts(p.search_keywords),
     auto_submit_paused: Boolean(p.auto_submit_paused),
     veto_window_hours: p.veto_window_hours ?? 12,
@@ -81,6 +82,7 @@ function toPrefs(f, admin) {
     focus_areas: f.focus_areas,
     custom_focus: f.custom_focus,
     blocked_employers: f.blocked_employers,
+    less_employers: f.less_employers,
     search_keywords: f.search_keywords,
     auto_submit_paused: f.auto_submit_paused,
     veto_window_hours: Number(f.veto_window_hours),
@@ -153,6 +155,11 @@ function PrefsForm({ prefs, admin, onSaved }) {
         hint="We never apply to an employer whose name includes what you add here. Untick one to allow it again."
         custom=${form.blocked_employers} onCustom=${(v) => set({ blocked_employers: v })}
         saveNote=${SAVE_NOTE} inputLabel="Add an employer" maxItems=${100} maxLength=${120} />
+
+      <${OwnList} key=${`fewer-${round}`} legend="Employers to see fewer jobs from"
+        hint="Their jobs still come to you when they fit you clearly better, but less often, and they're never sent automatically. Untick one to see its jobs as usual again."
+        custom=${form.less_employers} onCustom=${(v) => set({ less_employers: v })}
+        saveNote=${SAVE_NOTE} inputLabel="Add an employer to see less of" maxItems=${100} maxLength=${120} />
 
       <details class="more disclosure">
         <summary>Search words (advanced)</summary>

@@ -14,7 +14,8 @@ import {
 
 /** The columns a job card shows (never the long description). */
 export const CARD_COLUMNS = [
-  'id', 'title', 'organization', 'url', 'location_label', 'location_raw', 'remote', 'metro', 'pay_min', 'pay_max',
+  'id', 'title', 'organization', 'source', 'employer_id', 'url', 'location_label', 'location_raw', 'remote', 'metro',
+  'pay_min', 'pay_max',
   'pay_currency', 'pay_period', 'pay_status', 'deadline', 'score', 'level', 'score_summary', 'route_reasons', 'flags',
   'score_concerns',
 ].join(',');
@@ -92,8 +93,23 @@ export function useRemovable() {
  * A job to decide on. `onDecided(decision, result)` runs after Apply / Save for later / Skip worked.
  * One decision at a time: a second press while the first is still going is ignored.
  */
+/** "Show fewer jobs from this employer", or for one she already sees fewer of, "show them as usual". */
+export function FewerButton({ job, fewer, onChanged }) {
+  const change = async () => {
+    await rpc('employer_show_fewer', { p_organization: job.organization, p_fewer: !fewer });
+    onChanged(fewer
+      ? `You'll see jobs from ${job.organization} as usual again.`
+      : `You'll see fewer jobs from ${job.organization}. To undo this, use Preferences.`);
+  };
+  return html`
+    <p class="fewer-row">
+      <${ActionButton} className="btn-link" busyLabel="Saving…" onAction=${change}>
+        ${fewer ? `See jobs from ${job.organization} as usual` : `Show fewer jobs from ${job.organization}`}<//>
+    </p>`;
+}
+
 export function JobCard({
-  job, onDecided, tour, actionsTour,
+  job, onDecided, tour, actionsTour, fewer = false, onFewer,
 }) {
   const deciding = useRef(false);
   const notes = notesFor(job).slice(0, 6);
@@ -127,5 +143,6 @@ export function JobCard({
         <${ExternalLink} href=${job.url} className="posting-link">
           See full posting<span class="visually-hidden"> for ${job.title}</span><//>
       </div>
+      ${onFewer && html`<${FewerButton} job=${job} fewer=${fewer} onChanged=${onFewer} />`}
     </article>`;
 }

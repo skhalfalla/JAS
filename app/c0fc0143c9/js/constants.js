@@ -94,6 +94,7 @@ export const DEFAULT_PREFS = {
   ],
   "custom_focus": [],
   "blocked_employers": [],
+  "less_employers": [],
   "search_keywords": [
     "program manager public health",
     "program officer public health",

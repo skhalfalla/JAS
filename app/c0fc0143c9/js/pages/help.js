@@ -44,6 +44,8 @@ export default function Help() {
           expanded, but nothing is ever invented.</li>
         <li>On every document, “What changed” shows exactly how it differs from your master résumé.</li>
         <li>Not happy with something? Press “Ask for a change” and say what you want in your own words.</li>
+        <li>Found a job yourself? Use <a href=${href('/add')}>Add a job from a link</a> and we'll prepare your
+          tailored résumé and cover letter for it too.</li>
         <li>To add something new about yourself (a new job, certificate, or detail), use <a
           href=${href('/profile')}>My résumé facts</a>.</li>
       </ul>

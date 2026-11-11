@@ -8,7 +8,9 @@ import {
   ActionButton, Loaded, Notice, Page, useLoad,
 } from '../ui.js';
 import { appOf, JobMeta } from '../parts/jobs.js';
-import { JobFilters, applyFilters, filtersActive, readFilters } from '../parts/jobfilters.js';
+import {
+  JobFilters, applyFilters, filtersActive, mixEmployers, readFilters,
+} from '../parts/jobfilters.js';
 
 const VIEWS = {
   saved: ['Saved', 'Saved for later'],
@@ -18,7 +20,7 @@ const VIEWS = {
 };
 const PER_PAGE = 50;
 const COLUMNS = 'id,title,organization,location_label,location_raw,pay_min,pay_max,pay_currency,pay_period,pay_status,'
-  + 'route,filter_reasons,route_reasons,decision_reason,applications(id),metro,remote,deadline,score';
+  + 'route,filter_reasons,route_reasons,decision_reason,applications(id),metro,remote,deadline,score,source,employer_id';
 
 async function load(view, page, f) {
   let q = sb.from('jobs').select(COLUMNS);
@@ -28,7 +30,8 @@ async function load(view, page, f) {
   const from = (page - 1) * PER_PAGE;
   // One extra row says whether there's a next page.
   const found = await rows(applyFilters(q, f).range(from, from + PER_PAGE));
-  return { jobs: found.slice(0, PER_PAGE), hasMore: found.length > PER_PAGE };
+  const jobs = found.slice(0, PER_PAGE);
+  return { jobs: f.sort === 'mix' ? mixEmployers(jobs) : jobs, hasMore: found.length > PER_PAGE };
 }
 
 function setAsideReason(job) {

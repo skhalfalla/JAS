@@ -18,3 +18,14 @@
 .job-filters .filter-status { margin: 0.2rem 0 0; }
 .job-filters .filter-status:empty { display: none; }
 .job-filters .btn-link { min-height: 44px; }
+
+/* "Show fewer jobs from this employer" under a job's buttons, and the section those jobs move to. */
+.fewer-row { margin: 0.4rem 0 0; }
+.fewer-row .btn-link { min-height: 44px; text-align: left; font: inherit; cursor: pointer; }
+.fewer-section { margin-top: 2rem; border-top: 2px solid var(--border); padding-top: 0.4rem; }
+
+/* Add a job from a link */
+.add-link { max-width: 40rem; }
+.link-list { list-style: none; padding: 0; }
+.link-item h3 { margin: 0 0 0.3rem; }
+.link-url { overflow-wrap: anywhere; margin: 0 0 0.4rem; }

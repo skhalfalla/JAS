@@ -37,6 +37,7 @@ function MoreMenu({ me, counts, path }) {
         ${item('/applying-soon', 'Applying soon', c.scheduled)}
         ${item('/browse', 'Saved jobs', 0, { view: 'saved' })}
         ${item('/browse', 'Not a match', 0, { view: 'not_a_match' })}
+        ${item('/add', 'Add a job from a link')}
         ${item('/preferences', 'Preferences')}
         ${item('/profile', 'My résumé facts')}
         ${item('/writing', 'Writing style')}

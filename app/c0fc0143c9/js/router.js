@@ -6,7 +6,7 @@ export const ROUTES = [
   ['/applying-soon', 'applying_soon'], ['/applications', 'applications'], ['/applications/:id', 'application'],
   ['/documents/:id', 'document'], ['/questions', 'questions'], ['/preferences', 'preferences'],
   ['/profile', 'profile'], ['/writing', 'writing'], ['/answers', 'answers'], ['/setup', 'setup'],
-  ['/help', 'help'], ['/admin', 'admin'], ['/signin', 'signin'],
+  ['/help', 'help'], ['/add', 'add'], ['/admin', 'admin'], ['/signin', 'signin'],
 ];
 
 export function parse(hash = window.location.hash) {

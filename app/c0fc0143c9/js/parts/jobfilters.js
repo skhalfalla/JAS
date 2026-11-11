@@ -5,6 +5,7 @@ import { METRO_LABELS } from '../constants.js';
 import { navigate } from '../router.js';
 
 export const SORTS = {
+  mix: ['Recommended (a mix of employers)', [['score', false], ['deadline', true]]],
   deadline: ['Deadline (soonest first)', [['deadline', true], ['score', false]]],
   score: ['Best fit first', [['score', false], ['deadline', true]]],
   newest: ['Newest first', [['id', false]]],
@@ -16,6 +17,50 @@ const PLACES = {
   other_us: 'Other US cities',
 };
 const LISTED_PAY = ['meets_floor', 'explicit_intern_pay'];
+
+const SPREAD = 10; // fit points each earlier job from the same employer costs the next one in the mixed order
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Which employer a job counts as when mixing. Every City of New York agency is one employer (one City site). */
+export function employerGroup(job) {
+  if (job.source === 'nycjobs' || /^NYC\b/.test(job.organization || '')) return 'city-of-new-york';
+  return job.employer_id ? `employer-${job.employer_id}` : String(job.organization || '').trim().toLowerCase();
+}
+
+/** Whether an employer is on one of her lists. A name she typed matches any employer whose name contains it, ignoring
+ * case (the same rule the server uses). */
+export function employerListed(organization, names) {
+  const org = String(organization || '').toLowerCase();
+  return Boolean(org) && (names || []).some((n) => String(n || '').trim() && org.includes(String(n).trim().toLowerCase()));
+}
+
+/**
+ * "Recommended": best fit first, but spread across employers, so one employer with many openings can't fill the top
+ * of the list. Each job already placed from the same employer counts against the next one by SPREAD points. Jobs that
+ * close within 3 days still come first.
+ */
+export function mixEmployers(jobs) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const urgent = (j) => j.deadline && (new Date(`${j.deadline}T00:00:00`) - today) / DAY_MS <= 3;
+  const base = (j) => (j.score ?? 0) + (urgent(j) ? 1000 : 0);
+  const left = [...jobs];
+  const placed = {};
+  const out = [];
+  while (left.length) {
+    let best = 0;
+    let bestValue = -Infinity;
+    left.forEach((j, i) => {
+      const value = base(j) - SPREAD * (placed[employerGroup(j)] || 0);
+      if (value > bestValue) { best = i; bestValue = value; }
+    });
+    const [job] = left.splice(best, 1);
+    const group = employerGroup(job);
+    placed[group] = (placed[group] || 0) + 1;
+    out.push(job);
+  }
+  return out;
+}
 
 /** The filters from the page address (anything unknown is ignored). */
 export function readFilters(query, defaultSort) {

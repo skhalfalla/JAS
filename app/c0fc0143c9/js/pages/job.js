@@ -3,19 +3,21 @@ import { html, useRef, useState } from '../lib.js';
 import { rows, rpc, sb } from '../api.js';
 import { MESSAGES, payLocked, statusText } from '../format.js';
 import { href } from '../router.js';
-import { go, useApp } from '../store.js';
+import { flash, go, useApp } from '../store.js';
 import {
   ActionButton, ExternalLink, Loaded, Notice, Page, TextField, useLoad,
 } from '../ui.js';
 import {
-  appOf, CARD_COLUMNS, JobBadges, JobMeta, notesFor,
+  appOf, CARD_COLUMNS, FewerButton, JobBadges, JobMeta, notesFor,
 } from '../parts/jobs.js';
+import { employerListed } from '../parts/jobfilters.js';
+import { loadPrefs } from '../parts/settings.js';
 
 const COLUMNS = `${CARD_COLUMNS},description_text,pay_evidence,filter_reasons,route,applications(id,status)`;
 
 async function load(id) {
-  const found = await rows(sb.from('jobs').select(COLUMNS).eq('id', id).limit(1));
-  return found[0] || null;
+  const [found, prefs] = await Promise.all([rows(sb.from('jobs').select(COLUMNS).eq('id', id).limit(1)), loadPrefs()]);
+  return found[0] ? { ...found[0], fewer: employerListed(found[0].organization, prefs.less_employers) } : null;
 }
 
 function Decision({ job }) {
@@ -47,7 +49,7 @@ function Decision({ job }) {
     </div>`;
 }
 
-function JobDetails({ job }) {
+function JobDetails({ job, onChanged }) {
   const state = useApp();
   const application = appOf(job);
   const notes = notesFor(job, job.route === 'excluded');
@@ -69,6 +71,7 @@ function JobDetails({ job }) {
     ${notes.length > 0 && html`<h2>Worth knowing</h2><ul>${notes.map((r) => html`<li>${r}</li>`)}</ul>`}
     ${job.pay_evidence && html`<p class="small muted">Pay found in the posting: “${job.pay_evidence}”</p>`}
     <div class="decision" data-tour="job-decision">${decision}</div>
+    <${FewerButton} job=${job} fewer=${job.fewer} onChanged=${onChanged} />
     <h2>The posting</h2>
     <p><${ExternalLink} href=${job.url} className="posting-link">Open the original posting<//></p>
     ${job.description_text && html`
@@ -84,7 +87,7 @@ function JobPage({ id }) {
   return html`
     <${Page} title=${title} back=${{ href: href('/review'), label: 'Back to jobs to review' }}>
       <${Loaded} result=${result}>${(found) => (found
-        ? html`<${JobDetails} job=${found} />`
+        ? html`<${JobDetails} job=${found} onChanged=${(message) => { flash(message); result.reload(); }} />`
         : html`<${Notice} kind="info"><p>That job isn't here anymore.</p><//>`)}<//>
     <//>`;
 }
